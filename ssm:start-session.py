@@ -21,4 +21,4 @@ print("")
 ecs_run_task = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ssm', 'start-session',
                 '--target={}'.format(ecs_instance),
                 '--output=json', '--no-cli-pager']
-subprocess.Popen(ecs_run_task)
+subprocess.run(ecs_run_task)
