@@ -31,11 +31,25 @@ for key in ecs_task_definitions_data.get('taskDefinitionArns'):
 ecs_task_definition = input("Enter the value: ")
 print("")
 
+# List of EC2 Cluster VPC
+aws_cli_ec2_vpc = \
+    subprocess.check_output('aws-vault exec {} -- \
+    aws ec2 describe-vpcs \
+    --output json --no-cli-pager'.format(aws_iam_profile), shell=True)
+ec2_vpcs_data = json.loads(aws_cli_ec2_vpc.decode("utf-8"))
+print("List of available EC2 Cluster VPC: ")
+for key in ec2_vpcs_data.get('Vpcs'):
+    vpc = key.get('VpcId')
+    print(" - {}".format(vpc))
+ec2_vpc = input("Enter the value: ")
+print("")
+
 # List of EC2 Subnets
 aws_cli_ec2_subnet = \
     subprocess.check_output('aws-vault exec {} -- \
     aws ec2 describe-subnets \
-    --output json --no-cli-pager'.format(aws_iam_profile), shell=True)
+    --filters "Name=vpc-id,Values={}" \
+    --output json --no-cli-pager'.format(aws_iam_profile, ec2_vpc), shell=True)
 ec2_subnets_data = json.loads(aws_cli_ec2_subnet.decode("utf-8"))
 print("List of available EC2 Subnets: ")
 for key in ec2_subnets_data.get('Subnets'):
