@@ -17,18 +17,22 @@ for reservations in ec2_instances_data.get('Reservations'):
 ecs_instance = input("Enter the value: ")
 print("")
 
-port_forwarding_name = ''
-port_forwarding_parameters = ''
 is_port_forwarding = input("Do you want to Port Forward (Y/n): ")
 if is_port_forwarding == 'Y' or is_port_forwarding == 'y':
     port_number = input("What is the Port Number: ")
     port_forwarding_name = '--document-name=AWS-StartPortForwardingSession'
     port_forwarding_parameters = '--parameters={{"portNumber":["{port_number}"], "localPortNumber":["{port_number}"]}}'.format(port_number=port_number)
 
-# Actual task
-ecs_run_task = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ssm', 'start-session',
-                '--target={}'.format(ecs_instance),
-                '{}'.format(port_forwarding_name),
-                '{}'.format(port_forwarding_parameters),
-                '--output=json', '--no-cli-pager']
-subprocess.run(ecs_run_task)
+    # Actual task
+    ecs_run_task = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ssm', 'start-session',
+                    '--target={}'.format(ecs_instance),
+                    '{}'.format(port_forwarding_name),
+                    '{}'.format(port_forwarding_parameters),
+                    '--output=json', '--no-cli-pager']
+    subprocess.run(ecs_run_task)
+else:
+    # Actual task
+    ecs_run_task = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ssm', 'start-session',
+                    '--target={}'.format(ecs_instance),
+                    '--output=json', '--no-cli-pager']
+    subprocess.run(ecs_run_task)
