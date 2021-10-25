@@ -10,11 +10,16 @@ aws_cli_ecs_clusters = \
     aws ecs list-clusters \
     --output json --no-cli-pager'.format(aws_iam_profile), shell=True)
 ecs_clusters_data = json.loads(aws_cli_ecs_clusters.decode("utf-8"))
+
 print("List of available ECS Clusters: ")
+ecs_clusters = {}
+count = 1
 for key in ecs_clusters_data.get('clusterArns'):
-    cluster = key.split("/")
-    print(" - {}".format(cluster[1]))
-ecs_cluster = input("Enter the value: ")
+    value = key.split("/")[1]
+    ecs_clusters.update({count: value})
+    print("[{}] - {}".format(count, value))
+    count += 1
+ecs_cluster = ecs_clusters.get(int(input("Enter the value: ")))
 print("")
 
 # List of ECS Task Definitions
@@ -24,11 +29,16 @@ aws_cli_ecs_task_definitions = \
     --family-prefix ContainerStackDBMigrateTaskDefinition731D7433 \
     --output json --no-cli-pager'.format(aws_iam_profile), shell=True)
 ecs_task_definitions_data = json.loads(aws_cli_ecs_task_definitions.decode("utf-8"))
+
 print("List of available ECS Task Definitions: ")
+ecs_task_definitions = {}
+count = 1
 for key in ecs_task_definitions_data.get('taskDefinitionArns'):
-    task_definition = key.split("/")
-    print(" - {}".format(task_definition[1]))
-ecs_task_definition = input("Enter the value: ")
+    value = key.split("/")[1]
+    ecs_task_definitions.update({count: value})
+    print("[{}] - {}".format(count, value))
+    count += 1
+ecs_task_definition = ecs_task_definitions.get(int(input("Enter the value: ")))
 print("")
 
 # List of EC2 Cluster VPC
@@ -37,11 +47,16 @@ aws_cli_ec2_vpc = \
     aws ec2 describe-vpcs \
     --output json --no-cli-pager'.format(aws_iam_profile), shell=True)
 ec2_vpcs_data = json.loads(aws_cli_ec2_vpc.decode("utf-8"))
+
 print("List of available EC2 Cluster VPC: ")
+ec2_vpcs = {}
+count = 1
 for key in ec2_vpcs_data.get('Vpcs'):
-    vpc = key.get('VpcId')
-    print(" - {}".format(vpc))
-ec2_vpc = input("Enter the value: ")
+    value = key.get('VpcId')
+    ec2_vpcs.update({count: value})
+    print("[{}] - {} ({})".format(count, value, key.get('CidrBlock')))
+    count += 1
+ec2_vpc = ec2_vpcs.get(int(input("Enter the value: ")))
 print("")
 
 # List of EC2 Subnets
@@ -51,11 +66,16 @@ aws_cli_ec2_subnet = \
     --filters "Name=vpc-id,Values={}" \
     --output json --no-cli-pager'.format(aws_iam_profile, ec2_vpc), shell=True)
 ec2_subnets_data = json.loads(aws_cli_ec2_subnet.decode("utf-8"))
+
 print("List of available EC2 Subnets: ")
+ec2_subnets = {}
+count = 1
 for key in ec2_subnets_data.get('Subnets'):
-    subnet = key.get('SubnetArn').split("/")
-    print(" - {}".format(subnet[1]))
-ec2_subnet = input("Enter the value: ")
+    value = key.get('SubnetArn').split("/")[1]
+    ec2_subnets.update({count: value})
+    print("[{}] - {} ({})".format(count, value, key.get('CidrBlock')))
+    count += 1
+ec2_subnet = ec2_subnets.get(int(input("Enter the value: ")))
 print("")
 
 # # Your script you want to run

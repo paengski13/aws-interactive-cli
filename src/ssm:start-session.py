@@ -10,16 +10,22 @@ aws_cli_ec2_instances = \
     aws ec2 describe-instances \
     --output json --no-cli-pager'.format(aws_iam_profile), shell=True)
 ec2_instances_data = json.loads(aws_cli_ec2_instances.decode("utf-8"))
+
 print("List of available EC2 Instances: ")
+ecs_instances = {}
+count = 1
 for reservations in ec2_instances_data.get('Reservations'):
     for key in reservations.get('Instances'):
-        print(" - {}".format(key.get('InstanceId')))
-ecs_instance = input("Enter the value: ")
+        value = key.get('InstanceId')
+        ecs_instances.update({count: value})
+        print("[{}] - {}".format(count, value))
+        count += 1
+ecs_instance = ecs_instances.get(int(input("Enter the value: ")))
 print("")
 
-is_port_forwarding = input("Do you want to Port Forward (Y/n): ")
+is_port_forwarding = input("Do you want to Port Forward (default Yes): ") or 'Y'
 if is_port_forwarding == 'Y' or is_port_forwarding == 'y':
-    port_number = input("What is the Port Number: ")
+    port_number = input("What is the Port Number (default 3306): ") or 3306
     port_forwarding_name = '--document-name=AWS-StartPortForwardingSession'
     port_forwarding_parameters = '--parameters={{"portNumber":["{port_number}"], "localPortNumber":["{port_number}"]}}'.format(port_number=port_number)
 
