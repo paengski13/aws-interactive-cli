@@ -49,6 +49,7 @@ aws_cli_ecs_tasks = \
     --service-name {} \
     --output json --no-cli-pager'.format(aws_iam_profile, ecs_cluster, ecs_service), shell=True)
 ecs_tasks_data = json.loads(aws_cli_ecs_tasks.decode("utf-8"))
+print(ecs_tasks_data)
 
 print("List of available ECS Tasks: ")
 ecs_tasks = {}
@@ -66,6 +67,7 @@ ecs_run_task = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ecs', 'execu
                 '--region=ap-southeast-2',
                 '--cluster={}'.format(ecs_cluster),
                 '--task={}'.format(ecs_task),
+                '--container=PHP',
                 '--command="/bin/bash"',
                 '--interactive', '--output=json', '--no-cli-pager']
 subprocess.run(ecs_run_task)
