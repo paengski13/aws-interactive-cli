@@ -1,7 +1,20 @@
 import subprocess
 import json
 
-aws_iam_profile = input("Select a profile: ")
+# Get list of available aws-vault profiles
+aws_vault_profiles_data = subprocess.check_output('aws-vault list --profiles', shell=True)
+aws_vault_profiles_data = aws_vault_profiles_data.decode("utf-8").split("\n")
+print("List of available aws-vault profiles: ")
+aws_vault_profiles = {}
+count = 1
+for value in aws_vault_profiles_data:
+    if not value:
+        continue
+    aws_vault_profiles.update({count: value})
+    print("[{}] - {}".format(count, value))
+    count += 1
+
+aws_iam_profile = aws_vault_profiles.get(int(input("Enter aws-vault profile: ")))
 print("")
 
 # List of EC2 Instances
@@ -30,15 +43,17 @@ if is_port_forwarding == 'Y' or is_port_forwarding == 'y':
     port_forwarding_parameters = '--parameters={{"portNumber":["{port_number}"], "localPortNumber":["{port_number}"]}}'.format(port_number=port_number)
 
     # Actual task
-    ecs_run_task = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ssm', 'start-session',
+    ssm_start_session = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ssm', 'start-session',
                     '--target={}'.format(ecs_instance),
                     '{}'.format(port_forwarding_name),
                     '{}'.format(port_forwarding_parameters),
                     '--output=json', '--no-cli-pager']
-    subprocess.run(ecs_run_task)
+    print("Executing: {}".format(" ".join(ssm_start_session)))
+    subprocess.run(ssm_start_session)
 else:
     # Actual task
-    ecs_run_task = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ssm', 'start-session',
+    ssm_start_session = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ssm', 'start-session',
                     '--target={}'.format(ecs_instance),
                     '--output=json', '--no-cli-pager']
-    subprocess.run(ecs_run_task)
+    print("Executing: {}".format(" ".join(ssm_start_session)))
+    subprocess.run(ssm_start_session)

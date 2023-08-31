@@ -1,7 +1,20 @@
 import subprocess
 import json
 
-aws_iam_profile = input("Select a profile: ")
+# Get list of available aws-vault profiles
+aws_vault_profiles_data = subprocess.check_output('aws-vault list --profiles', shell=True)
+aws_vault_profiles_data = aws_vault_profiles_data.decode("utf-8").split("\n")
+print("List of available aws-vault profiles: ")
+aws_vault_profiles = {}
+count = 1
+for value in aws_vault_profiles_data:
+    if not value:
+        continue
+    aws_vault_profiles.update({count: value})
+    print("[{}] - {}".format(count, value))
+    count += 1
+
+aws_iam_profile = aws_vault_profiles.get(int(input("Enter aws-vault profile: ")))
 print("")
 
 # List of EC2 Instances
@@ -51,4 +64,5 @@ ssm_run_task = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ssm', 'send-
                 '--instance-ids={}'.format(ecs_instance),
                 '--parameters={}'.format(parameter),
                 '--output=json', '--no-cli-pager']
+print("Executing: {}".format(" ".join(ssm_run_task)))
 subprocess.run(ssm_run_task)

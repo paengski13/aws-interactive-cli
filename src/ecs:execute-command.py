@@ -1,7 +1,20 @@
 import subprocess
 import json
 
-aws_iam_profile = input("Select a profile: ")
+# Get list of available aws-vault profiles
+aws_vault_profiles_data = subprocess.check_output('aws-vault list --profiles', shell=True)
+aws_vault_profiles_data = aws_vault_profiles_data.decode("utf-8").split("\n")
+print("List of available aws-vault profiles: ")
+aws_vault_profiles = {}
+count = 1
+for value in aws_vault_profiles_data:
+    if not value:
+        continue
+    aws_vault_profiles.update({count: value})
+    print("[{}] - {}".format(count, value))
+    count += 1
+
+aws_iam_profile = aws_vault_profiles.get(int(input("Enter aws-vault profile: ")))
 print("")
 
 # List of ECS Clusters
@@ -61,11 +74,36 @@ for key in ecs_tasks_data.get('taskArns'):
 ecs_task = ecs_tasks.get(int(input("Enter the value: ")))
 print("")
 
+# List of ECS task containers
+aws_cli_ecs_task_container = \
+    subprocess.check_output('aws-vault exec {} -- \
+    aws ecs describe-tasks \
+    --cluster {} \
+    --task {} \
+    --output json --no-cli-pager'.format(aws_iam_profile, ecs_cluster, ecs_task), shell=True)
+
+ecs_task_containers_data = json.loads(aws_cli_ecs_task_container.decode("utf-8"))
+
+print("List of available ECS Task Containers: ")
+ecs_task_container = {}
+count = 1
+for key in ecs_task_containers_data.get('tasks'):
+    containers = key.get('containers')
+    for container in containers:
+        value = container.get('name')
+        ecs_task_container.update({count: value})
+        print("[{}] - {}".format(count, value))
+        count += 1
+ecs_task_container = ecs_task_container.get(int(input("Enter the value: ")))
+print("")
+
 # Actual task
-ecs_run_task = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ecs', 'execute-command',
+ecs_execute_command = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ecs', 'execute-command',
                 '--region=ap-southeast-2',
                 '--cluster={}'.format(ecs_cluster),
                 '--task={}'.format(ecs_task),
                 '--command="/bin/bash"',
+                '--container={}'.format(ecs_task_container),
                 '--interactive', '--output=json', '--no-cli-pager']
-subprocess.run(ecs_run_task)
+print("Executing: {}".format(" ".join(ecs_execute_command)))
+subprocess.run(ecs_execute_command)
