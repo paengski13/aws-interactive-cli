@@ -38,9 +38,10 @@ print("")
 
 is_port_forwarding = input("Do you want to Port Forward (default Yes): ") or 'Y'
 if is_port_forwarding == 'Y' or is_port_forwarding == 'y':
-    port_number = input("What is the Port Number (default 3306): ") or 3306
+    remote_port_number = input("What is the Remote Port Number (default 3306): ") or 3306
+    local_port_number = input("What is the Local Port Number (default 3306): ") or 3306
     port_forwarding_name = '--document-name=AWS-StartPortForwardingSession'
-    port_forwarding_parameters = '--parameters={{"portNumber":["{port_number}"], "localPortNumber":["{port_number}"]}}'.format(port_number=port_number)
+    port_forwarding_parameters = '--parameters={{"portNumber":["{remote_port_number}"], "localPortNumber":["{local_port_number}"]}}'.format(remote_port_number=remote_port_number, local_port_number=local_port_number)
 
     # Actual task
     ssm_start_session = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ssm', 'start-session',
