@@ -99,7 +99,6 @@ print("")
 
 # Actual task
 ecs_execute_command = ['aws-vault', 'exec', aws_iam_profile, '--', 'aws', 'ecs', 'execute-command',
-                '--region=ap-southeast-2',
                 '--cluster={}'.format(ecs_cluster),
                 '--task={}'.format(ecs_task),
                 '--command="/bin/bash"',
